@@ -1,0 +1,655 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Love Notes</title>
+  <style>
+    :root{
+      --bg:#000;
+      --text:#fff;
+      --muted:rgba(255,255,255,.65);
+      --dim:rgba(255,255,255,.12);
+      --card:rgba(255,255,255,.06);
+      --focus:rgba(255,255,255,.22);
+    }
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      min-height:100vh;
+      background:var(--bg);
+      color:var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+    }
+    .wrap{
+      max-width:720px;
+      margin:0 auto;
+      padding:28px 22px 18px;
+      display:flex;
+      flex-direction:column;
+      min-height:100vh;
+      gap:14px;
+    }
+    .titleRow{
+      display:flex;
+      align-items:baseline;
+      justify-content:space-between;
+      gap:14px;
+      margin-top:6px;
+    }
+    .title{
+      display:flex;
+      align-items:baseline;
+      gap:10px;
+      font-weight:700;
+      font-size:28px;
+      letter-spacing:.2px;
+      margin:0;
+    }
+    .subtitle{
+      font-size:14px;
+      color:var(--muted);
+      margin:0;
+    }
+    .btn{
+      appearance:none;
+      border:1px solid var(--dim);
+      background:transparent;
+      color:var(--text);
+      padding:10px 12px;
+      border-radius:10px;
+      font-size:14px;
+      cursor:pointer;
+      transition:transform .06s ease, border-color .12s ease, background .12s ease;
+      user-select:none;
+      white-space:nowrap;
+    }
+    .btn:hover{ border-color:var(--focus); background:rgba(255,255,255,.04); }
+    .btn:active{ transform:scale(.98); }
+    .tabs{
+      display:flex;
+      gap:8px;
+      margin-top:2px;
+    }
+    .tab{
+      flex:0 0 auto;
+      padding:10px 12px;
+      border-radius:999px;
+      border:1px solid var(--dim);
+      background:transparent;
+      color:var(--muted);
+      cursor:pointer;
+      font-size:14px;
+      transition:border-color .12s ease, background .12s ease, color .12s ease;
+    }
+    .tab:hover{ border-color:var(--focus); background:rgba(255,255,255,.04); }
+    .tab[aria-selected="true"]{
+      color:var(--text);
+      border-color:rgba(255,255,255,.28);
+      background:rgba(255,255,255,.08);
+    }
+    .panel{
+      border:1px solid var(--dim);
+      background:var(--card);
+      border-radius:14px;
+      padding:16px;
+      min-height:220px;
+    }
+    .empty{
+      color:rgba(255,255,255,.38);
+      font-size:13px;
+      line-height:1.45;
+      margin:0;
+      max-width:60ch;
+    }
+    .divider{
+      height:1px;
+      background:var(--dim);
+      margin:12px 0 0;
+    }
+    footer{
+      margin-top:auto;
+      padding-top:14px;
+      color:rgba(255,255,255,.45);
+      font-size:12px;
+      text-align:center;
+    }
+    footer .dot{ opacity:.55; padding:0 6px; }
+    /* tiny modal */
+    .modalOverlay{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.6);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+    }
+    .modal{
+      width:min(520px, 100%);
+      border:1px solid rgba(255,255,255,.16);
+      background:#0a0a0a;
+      border-radius:16px;
+      padding:16px;
+    }
+    .modalHead{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:10px;
+    }
+    .modalTitle{
+      margin:0;
+      font-size:16px;
+      font-weight:650;
+    }
+    .closeBtn{
+      border:1px solid var(--dim);
+      background:transparent;
+      color:var(--text);
+      border-radius:10px;
+      padding:8px 10px;
+      cursor:pointer;
+    }
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      margin-top:10px;
+    }
+    label{
+      font-size:12px;
+      color:var(--muted);
+    }
+    input{
+      background:transparent;
+      border:1px solid var(--dim);
+      border-radius:12px;
+      padding:10px 12px;
+      color:var(--text);
+      outline:none;
+    }
+    input:focus{ border-color:rgba(255,255,255,.28); }
+    .hint{
+      margin:10px 0 0;
+      font-size:12px;
+      color:rgba(255,255,255,.45);
+      line-height:1.35;
+    }
+.titleRow{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:14px;
+  margin-top:6px;
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+
+.appIcon{
+  width:54px;
+  height:54px;
+  border-radius:16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:26px;
+  background: radial-gradient(circle at 30% 30%, rgba(255,70,120,.28), rgba(140,80,255,.16), rgba(255,255,255,.06));
+  border: 1px solid rgba(255,255,255,.18);
+  box-shadow: 0 10px 30px rgba(0,0,0,.55);
+}
+
+.brandText{ display:flex; flex-direction:column; gap:2px; }
+
+.title{
+  display:flex;
+  align-items:baseline;
+  gap:10px;
+  font-weight:800;
+  font-size:30px;
+  letter-spacing:.2px;
+  margin:0;
+}
+
+.accent{
+  color:#ff3b5c; /* rojo-rosa */
+}
+
+.titleIcon{
+  transform: translateY(2px);
+}
+
+.byline{
+  margin:2px 0 8px;
+  font-size:12px;
+  color: rgba(255,255,255,.55);
+  letter-spacing:.2px;
+}
+
+.subtitle{
+  font-size:18px;
+  color: rgba(255,255,255,.9);
+  margin:0;
+}
+
+  </style>
+</head>
+<body>
+  <main class="wrap">
+   <div class="titleRow">
+  <div class="brand">
+    <div class="appIcon" aria-hidden="true">&#127897;&#65039;</div>
+
+    <div class="brandText">
+      <h1 class="title">
+        <span class="accent">Love</span> Notes
+      </h1>
+
+      <p class="byline">by Lau &amp; Geppie &middot; Lilazul</p>
+      <p class="subtitle">Your voice notes</p>
+    </div>
+  </div>
+  <button class="btn" id="addBtn" type="button">+ Add note</button>
+</div>
+
+    <nav class="tabs" role="tablist" aria-label="Love Notes tabs">
+      <button class="tab" id="tab-voices" role="tab" aria-selected="true" aria-controls="panel-voices" type="button">Voices</button>
+      <button class="tab" id="tab-songs" role="tab" aria-selected="false" aria-controls="panel-songs" type="button">Songs</button>
+    </nav>
+
+    <section class="panel" id="panel-voices" role="tabpanel" aria-labelledby="tab-voices">
+      <p class="empty">No voice notes yet. Add one when you feel like it.</p>
+      <div class="divider"></div>
+    </section>
+
+    <section class="panel" id="panel-songs" role="tabpanel" aria-labelledby="tab-songs" hidden>
+      <p class="empty">No songs yet. You can paste a Suno link later (no API needed).</p>
+      <div class="divider"></div>
+    </section>
+
+    <footer>
+      Love Notes <span class="dot">&middot;</span> by Lau &amp; Geppie <span class="dot">&middot;</span> Lilazul
+    </footer>
+  </main>
+
+  <!-- tiny modal (placeholder for future add flow) -->
+  <div class="modalOverlay" id="modal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modalHead">
+        <h2 class="modalTitle" id="modalTitle">Add note</h2>
+        <button class="closeBtn" id="closeTopBtn" type="button">Close</button>
+      </div>
+
+      <div class="field">
+        <label for="titleInput">Title (optional)</label>
+        <input id="titleInput" type="text" placeholder="A tiny love note..." />
+      </div>
+
+      <div class="field" id="voiceField">
+        <label for="audioInput">Audio file (mp3, m4a, wav)</label>
+        <input id="audioInput" type="file" accept="audio/*" />
+        <label for="ttsTextInput">Or text to generate with ElevenLabs</label>
+        <input id="ttsTextInput" type="text" placeholder="Write your love note text..." />
+        <label for="voiceIdInput">Voice ID</label>
+        <input id="voiceIdInput" type="text" placeholder="Nh2zY9kknu6z4pZy6FhD" />
+      </div>
+
+      <div class="field" id="songField" hidden>
+        <label for="songUrlInput">Song link (Suno / YouTube / etc.)</label>
+        <input id="songUrlInput" type="url" placeholder="https://..." />
+      </div>
+
+      <div style="display:flex; gap:10px; margin-top:14px;">
+        <button class="btn" id="saveBtn" type="button">Save</button>
+        <button class="btn" id="generateBtn" type="button">Generate voice</button>
+        <button class="closeBtn" id="closeBtn" type="button">Close</button>
+      </div>
+
+      <p class="hint" id="hintText"></p>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // Supabase
+    const SUPABASE_URL = "https://YOUR-PROJECT-REF.supabase.co";
+    const SUPABASE_ANON_KEY = "YOUR_ANON_KEY_HERE";
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // Tabs
+    const tabVoices = document.getElementById("tab-voices");
+    const tabSongs = document.getElementById("tab-songs");
+    const panelVoices = document.getElementById("panel-voices");
+    const panelSongs = document.getElementById("panel-songs");
+
+    let activeTab = "voices";
+    function setTab(which){
+      activeTab = which;
+      const voices = which === "voices";
+      tabVoices.setAttribute("aria-selected", String(voices));
+      tabSongs.setAttribute("aria-selected", String(!voices));
+      panelVoices.hidden = !voices;
+      panelSongs.hidden = voices;
+      refreshUIForTab();
+    }
+    tabVoices.addEventListener("click", () => setTab("voices"));
+    tabSongs.addEventListener("click", () => setTab("songs"));
+
+    // Modal
+    const modal = document.getElementById("modal");
+    const addBtn = document.getElementById("addBtn");
+    const closeBtn = document.getElementById("closeBtn");
+    const closeTopBtn = document.getElementById("closeTopBtn");
+    const saveBtn = document.getElementById("saveBtn");
+    const generateBtn = document.getElementById("generateBtn");
+
+    const titleInput = document.getElementById("titleInput");
+    const audioInput = document.getElementById("audioInput");
+    const ttsTextInput = document.getElementById("ttsTextInput");
+    const voiceIdInput = document.getElementById("voiceIdInput");
+    const songUrlInput = document.getElementById("songUrlInput");
+    const voiceField = document.getElementById("voiceField");
+    const songField = document.getElementById("songField");
+    const hintText = document.getElementById("hintText");
+
+    function openModal(){
+      modal.style.display = "flex";
+      titleInput.value = "";
+      if (audioInput) audioInput.value = "";
+      if (ttsTextInput) ttsTextInput.value = "";
+      if (voiceIdInput) voiceIdInput.value = "";
+      if (songUrlInput) songUrlInput.value = "";
+      refreshUIForTab();
+    }
+    function closeModal(){ modal.style.display = "none"; }
+
+    addBtn.addEventListener("click", openModal);
+    if (closeBtn) closeBtn.addEventListener("click", closeModal);
+    if (closeTopBtn) closeTopBtn.addEventListener("click", closeModal);
+    modal.addEventListener("click", (e) => { if(e.target === modal) closeModal(); });
+    document.addEventListener("keydown", (e) => { if(e.key === "Escape") closeModal(); });
+
+    function refreshUIForTab(){
+      if (!modal || modal.style.display !== "flex") return;
+      if (activeTab === "voices"){
+        voiceField.hidden = false;
+        songField.hidden = true;
+        if (generateBtn) generateBtn.hidden = false;
+        hintText.textContent = "Upload an audio file and save it to your Love Notes.";
+      } else {
+        voiceField.hidden = true;
+        songField.hidden = false;
+        if (generateBtn) generateBtn.hidden = true;
+        hintText.textContent = "Paste a song link (Suno / YouTube / etc.) and save it.";
+      }
+    }
+
+    // Render helpers
+    function escapeHtml(s){
+      return (s ?? "").toString()
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    function voiceItemHTML(v){
+      const title = escapeHtml(v.title || "Untitled note");
+      const url = v.audio_url;
+      return `
+        <div style="display:flex; flex-direction:column; gap:8px; padding:12px; border:1px solid rgba(255,255,255,.12); border-radius:12px; margin-bottom:12px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+            <div style="font-weight:650;">${title}</div>
+            <div style="display:flex; gap:10px; align-items:center;">
+              <a class="btn" href="${url}" download>⬇️ Download</a>
+              <button class="btn" type="button" onclick="deleteVoice('${v.id}')">️ Delete</button>
+            </div>
+          </div>
+          <audio controls preload="none" src="${url}"></audio>
+        </div>
+      `;
+    }
+
+    function songItemHTML(s){
+      const title = escapeHtml(s.title || "Untitled song");
+      const url = s.source_url;
+      const platform = escapeHtml(s.platform || "");
+      return `
+        <div style="display:flex; flex-direction:column; gap:6px; padding:12px; border:1px solid rgba(255,255,255,.12); border-radius:12px; margin-bottom:12px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+            <div style="font-weight:650;">${title}</div>
+            <div style="display:flex; align-items:center; gap:10px;">
+              ${platform ? `<div style="color:rgba(255,255,255,.55); font-size:12px;">${platform}</div>` : ""}
+              <button class="btn" type="button" onclick="deleteSong('${s.id}')">Delete</button>
+            </div>
+          </div>
+          <a href="${url}" target="_blank" rel="noreferrer" style="color:rgba(255,255,255,.85); word-break:break-all;">${escapeHtml(url)}</a>
+        </div>
+      `;
+    }
+
+    // Load data
+    async function loadVoices(){
+      panelVoices.innerHTML = `<p class="empty">Loading voices...</p>`;
+      const { data, error } = await supabaseClient
+        .from("voices")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error){
+        panelVoices.innerHTML = `<p class="empty">Error loading voices.</p>`;
+        return;
+      }
+      if (!data?.length){
+        panelVoices.innerHTML = `<p class="empty">No voice notes yet. Add one when you feel like it.</p>`;
+        return;
+      }
+      panelVoices.innerHTML = data.map(voiceItemHTML).join("");
+    }
+
+    async function loadSongs(){
+      panelSongs.innerHTML = `<p class="empty">Loading songs...</p>`;
+      const { data, error } = await supabaseClient
+        .from("songs")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error){
+        panelSongs.innerHTML = `<p class="empty">Error loading songs.</p>`;
+        return;
+      }
+      if (!data?.length){
+        panelSongs.innerHTML = `<p class="empty">No songs yet. Paste a link when you want.</p>`;
+        return;
+      }
+      panelSongs.innerHTML = data.map(songItemHTML).join("");
+    }
+
+    // Save actions
+    async function saveVoice(){
+      const file = audioInput.files?.[0];
+      if (!file) { alert("Pick an audio file first."); return; }
+
+      const title = titleInput.value.trim() || null;
+      const ext = (file.name.split(".").pop() || "mp3").toLowerCase();
+      const fileName = `${Date.now()}-${Math.random().toString(16).slice(2)}.${ext}`;
+      const storagePath = `voices/${fileName}`;
+
+      const { error: upErr } = await supabaseClient
+        .storage
+        .from("love-notes")
+        .upload(storagePath, file, { upsert: false, contentType: file.type });
+
+      if (upErr){
+        alert("Upload failed (check bucket name/policies).");
+        return;
+      }
+
+      const { data: pub } = supabaseClient
+        .storage
+        .from("love-notes")
+        .getPublicUrl(storagePath);
+
+      const audioUrl = pub?.publicUrl;
+      if (!audioUrl){
+        alert("Could not get public URL.");
+        return;
+      }
+
+      const { error: insErr } = await supabaseClient
+        .from("voices")
+        .insert([{ title, audio_url: audioUrl, storage_path: storagePath }]);
+
+      if (insErr){
+        alert("Saved file but DB insert failed (check RLS policies).");
+        return;
+      }
+
+      closeModal();
+      await loadVoices();
+    }
+
+    async function saveSong(){
+      const title = titleInput.value.trim() || null;
+      const url = songUrlInput.value.trim();
+      if (!url) { alert("Paste a link first."); return; }
+
+      let platform = null;
+      const u = url.toLowerCase();
+      if (u.includes("suno")) platform = "suno";
+      else if (u.includes("youtube") || u.includes("youtu.be")) platform = "youtube";
+      else platform = "other";
+
+      const { error } = await supabaseClient
+        .from("songs")
+        .insert([{ title, source_url: url, platform }]);
+
+      if (error){
+        alert("Insert failed (check RLS policies).");
+        return;
+      }
+
+      closeModal();
+      await loadSongs();
+    }
+
+    async function deleteVoice(id){
+      if (!id) return;
+      if (!confirm("Delete this voice note?")) return;
+
+      const { data: row, error: rowErr } = await supabaseClient
+        .from("voices")
+        .select("id, storage_path")
+        .eq("id", id)
+        .maybeSingle();
+
+      if (rowErr){
+        alert("Could not load note info for delete.");
+        return;
+      }
+
+      if (row?.storage_path){
+        const { error: rmErr } = await supabaseClient
+          .storage
+          .from("love-notes")
+          .remove([row.storage_path]);
+        if (rmErr){
+          alert("File delete failed (check bucket policies).");
+          return;
+        }
+      }
+
+      const { error: delErr } = await supabaseClient
+        .from("voices")
+        .delete()
+        .eq("id", id);
+
+      if (delErr){
+        alert("Delete failed (check RLS policies).");
+        return;
+      }
+
+      await loadVoices();
+    }
+
+    window.deleteVoice = deleteVoice;
+
+    async function deleteSong(id){
+      if (!id) return;
+      if (!confirm("Delete this song link?")) return;
+
+      const { error } = await supabaseClient
+        .from("songs")
+        .delete()
+        .eq("id", id);
+
+      if (error){
+        alert("Delete failed (check RLS policies).");
+        return;
+      }
+
+      await loadSongs();
+    }
+
+    window.deleteSong = deleteSong;
+
+    saveBtn.addEventListener("click", async () => {
+      saveBtn.disabled = true;
+      try{
+        if (activeTab === "voices") await saveVoice();
+        else await saveSong();
+      } finally {
+        saveBtn.disabled = false;
+      }
+    });
+
+    generateBtn.addEventListener("click", async () => {
+      const text = ttsTextInput.value.trim();
+      const voice_id = voiceIdInput.value.trim();
+      const title = titleInput.value.trim() || null;
+
+      if (!text) { alert("Write some text first."); return; }
+      if (!voice_id) { alert("Add a voice ID first."); return; }
+
+      generateBtn.disabled = true;
+      try{
+        await sendToMcpTts(text, voice_id, title);
+        closeModal();
+        await loadVoices();
+      } catch (err){
+        alert("TTS generation failed. Check MCP URL/CORS and try again.");
+      } finally {
+        generateBtn.disabled = false;
+      }
+    });
+
+    async function sendToMcpTts(text, voice_id, title){
+      const res = await fetch("https://lovenotesmcp.onrender.com/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          text,
+          voice_id,
+          title
+        })
+      });
+      if (!res.ok) throw new Error(`TTS failed: ${res.status}`);
+    }
+
+    // Initial load
+    loadVoices();
+    loadSongs();
+  </script>
+</body>
+</html>
+
+
+
+
+
