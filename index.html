@@ -237,6 +237,115 @@
   margin:0;
 }
 
+.supportRow{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  flex-wrap:wrap;
+}
+
+.supportChip{
+  appearance:none;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid rgba(255,255,255,.12);
+  background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+  color:rgba(255,255,255,.9);
+  border-radius:999px;
+  padding:9px 14px;
+  font-size:13px;
+  letter-spacing:.1px;
+  cursor:pointer;
+  transition:transform .12s ease, border-color .12s ease, background .12s ease, box-shadow .12s ease;
+  box-shadow:0 10px 28px rgba(0,0,0,.16);
+}
+
+.supportChip:hover{
+  border-color:rgba(255,255,255,.22);
+  background:linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.05));
+  box-shadow:0 14px 34px rgba(0,0,0,.22);
+}
+
+.supportChip:active{ transform:scale(.98); }
+
+.supportNote{
+  font-size:12px;
+  color:rgba(255,255,255,.46);
+  margin:0;
+}
+
+.footerSupport{
+  margin-top:8px;
+}
+
+.footerLink{
+  color:rgba(255,255,255,.72);
+  text-decoration:none;
+  border-bottom:1px solid rgba(255,255,255,.18);
+  padding-bottom:1px;
+}
+
+.footerLink:hover{
+  color:var(--text);
+  border-bottom-color:rgba(255,255,255,.34);
+}
+
+.supportModal{
+  width:min(420px, 100%);
+  border:1px solid rgba(255,255,255,.14);
+  background:linear-gradient(180deg, rgba(14,14,14,.98), rgba(8,8,8,.98));
+  border-radius:20px;
+  padding:20px;
+  box-shadow:0 24px 60px rgba(0,0,0,.42);
+}
+
+.supportBody{
+  margin:0;
+  color:rgba(255,255,255,.78);
+  line-height:1.55;
+  font-size:14px;
+}
+
+.supportActions{
+  display:flex;
+  gap:10px;
+  margin-top:18px;
+  flex-wrap:wrap;
+}
+
+.btnPrimary{
+  background:rgba(255,255,255,.1);
+  border-color:rgba(255,255,255,.18);
+}
+
+.btnGhost{
+  color:rgba(255,255,255,.78);
+}
+
+@media (max-width: 640px){
+  .wrap{
+    padding:22px 16px 18px;
+  }
+
+  .brand{
+    align-items:flex-start;
+  }
+
+  .supportRow{
+    align-items:flex-start;
+  }
+
+  .supportChip{
+    width:100%;
+  }
+
+  .supportActions > *{
+    flex:1 1 100%;
+  }
+}
+
   </style>
 </head>
 <body>
@@ -257,6 +366,13 @@
   <button class="btn" id="addBtn" type="button">+ Add note</button>
 </div>
 
+    <div class="supportRow">
+      <button class="supportChip" id="supportChip" type="button" aria-haspopup="dialog" aria-controls="supportModal">
+        ☕ Support us
+      </button>
+      <p class="supportNote">This little space is yours, support is always optional.</p>
+    </div>
+
     <nav class="tabs" role="tablist" aria-label="Love Notes tabs">
       <button class="tab" id="tab-voices" role="tab" aria-selected="true" aria-controls="panel-voices" type="button">Voices</button>
       <button class="tab" id="tab-songs" role="tab" aria-selected="false" aria-controls="panel-songs" type="button">Songs</button>
@@ -274,6 +390,9 @@
 
     <footer>
       Love Notes <span class="dot">&middot;</span> by Lau &amp; Geppie <span class="dot">&middot;</span> Lilazul
+      <div class="footerSupport">
+        <a class="footerLink" href="https://ko-fi.com/lauygeppielilazul" target="_blank" rel="noreferrer">☕ Support on Ko-fi</a>
+      </div>
     </footer>
   </main>
 
@@ -314,6 +433,30 @@
     </div>
   </div>
 
+  <div class="modalOverlay" id="supportModal">
+    <div class="supportModal" role="dialog" aria-modal="true" aria-labelledby="supportModalTitle">
+      <div class="modalHead">
+        <h2 class="modalTitle" id="supportModalTitle">Support Love Notes</h2>
+        <button class="closeBtn" id="supportCloseTopBtn" type="button">Close</button>
+      </div>
+
+      <p class="supportBody">
+        This is completely optional 💛
+        <br /><br />
+        If Love Notes has been useful to you and you’d like to support my work so I can keep building and improving little things like this, you can buy me a coffee on Ko-fi.
+        <br />
+        Thank you!
+        <br />
+        Lau&amp;Geppie
+      </p>
+
+      <div class="supportActions">
+        <a class="btn btnPrimary" href="https://ko-fi.com/lauygeppielilazul" target="_blank" rel="noreferrer">☕ Visit Ko-fi</a>
+        <button class="btn btnGhost" id="supportCloseBtn" type="button">Not now</button>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     // Supabase
@@ -347,6 +490,10 @@
     const closeTopBtn = document.getElementById("closeTopBtn");
     const saveBtn = document.getElementById("saveBtn");
     const generateBtn = document.getElementById("generateBtn");
+    const supportChip = document.getElementById("supportChip");
+    const supportModal = document.getElementById("supportModal");
+    const supportCloseBtn = document.getElementById("supportCloseBtn");
+    const supportCloseTopBtn = document.getElementById("supportCloseTopBtn");
 
     const titleInput = document.getElementById("titleInput");
     const audioInput = document.getElementById("audioInput");
@@ -367,12 +514,23 @@
       refreshUIForTab();
     }
     function closeModal(){ modal.style.display = "none"; }
+    function openSupportModal(){ supportModal.style.display = "flex"; }
+    function closeSupportModal(){ supportModal.style.display = "none"; }
 
     addBtn.addEventListener("click", openModal);
+    supportChip.addEventListener("click", openSupportModal);
     if (closeBtn) closeBtn.addEventListener("click", closeModal);
     if (closeTopBtn) closeTopBtn.addEventListener("click", closeModal);
+    if (supportCloseBtn) supportCloseBtn.addEventListener("click", closeSupportModal);
+    if (supportCloseTopBtn) supportCloseTopBtn.addEventListener("click", closeSupportModal);
     modal.addEventListener("click", (e) => { if(e.target === modal) closeModal(); });
-    document.addEventListener("keydown", (e) => { if(e.key === "Escape") closeModal(); });
+    supportModal.addEventListener("click", (e) => { if(e.target === supportModal) closeSupportModal(); });
+    document.addEventListener("keydown", (e) => {
+      if(e.key === "Escape"){
+        closeModal();
+        closeSupportModal();
+      }
+    });
 
     function refreshUIForTab(){
       if (!modal || modal.style.display !== "flex") return;
